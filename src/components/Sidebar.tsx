@@ -9,17 +9,9 @@ export function Sidebar() {
   const [tab, setTab] = useState<'files' | 'history'>('files');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadFolder, setUploadFolder] = useState<string>('');
-
-  const handleCreateFolder = () => {
-    const name = prompt('Folder name:');
-    if (name && name.trim() && !files[name]) {
-      addFile({
-        name: name.trim(),
-        language: 'folder',
-        content: ''
-      });
-    }
-  };
+  
+  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const [newFolderName, setNewFolderName] = useState('');
 
   const handleAddAsset = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -50,19 +42,19 @@ export function Sidebar() {
         if (file.language !== 'image') setActiveFile(file.name);
       }}
       className={cn(
-        "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-sm w-[90%] text-left transition-colors border border-transparent truncate whitespace-nowrap",
+        "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-sm w-full text-left transition-colors border border-transparent overflow-hidden",
         activeFile === file.name ? "text-blue-500 bg-blue-500/10 font-semibold" : "hover:bg-[#262626] hover:text-neutral-200",
         file.language === 'image' && "cursor-default text-neutral-400"
       )}
       title={file.name}
     >
-      <span className="shrink-0">
-        {file.language === 'html' && <FileCode2 size={14} className="text-orange-400" />}
-        {file.language === 'css' && <FileCode size={14} className="text-blue-400" />}
-        {file.language === 'javascript' && <FileJson size={14} className="text-yellow-400" />}
-        {file.language === 'image' && <ImageIcon size={14} className="text-pink-400" />}
+      <span className="shrink-0 flex items-center justify-center w-4 h-4">
+        {file.language === 'html' && <FileCode2 size={15} className="text-orange-400" />}
+        {file.language === 'css' && <FileCode size={15} className="text-blue-400" />}
+        {file.language === 'javascript' && <FileJson size={15} className="text-yellow-400" />}
+        {file.language === 'image' && <ImageIcon size={15} className="text-pink-400" />}
       </span>
-      <span className="truncate">{file.name.split('/').pop()}</span>
+      <span className="truncate whitespace-nowrap leading-none pt-0.5">{file.name.split('/').pop()}</span>
     </button>
   );
 
@@ -101,7 +93,7 @@ export function Sidebar() {
               />
               <div className="flex gap-0.5">
                 <button 
-                  onClick={handleCreateFolder}
+                  onClick={() => setIsCreatingFolder(true)}
                   className="p-1 hover:bg-[#262626] rounded text-neutral-400 hover:text-white transition-colors"
                   title="New Folder"
                 >
@@ -120,7 +112,38 @@ export function Sidebar() {
               </div>
             </div>
             
-            <div className="pl-5 flex flex-col space-y-0.5 border-l border-[#262626] ml-4 mt-1 w-full relative">
+            <div className="pl-3 pr-2 flex flex-col space-y-0.5 border-l border-[#262626] ml-3 mt-1 relative w-auto">
+              
+              {isCreatingFolder && (
+                <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm w-full transition-colors border border-blue-500/50 bg-[#262626]/40 mb-1">
+                  <Folder size={14} className="text-blue-400 shrink-0" />
+                  <input 
+                    autoFocus
+                    type="text"
+                    placeholder="Folder name..."
+                    className="bg-transparent border-none text-xs text-white focus:outline-none w-full"
+                    value={newFolderName}
+                    onChange={(e) => setNewFolderName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        if (newFolderName.trim() && !files[newFolderName.trim()]) {
+                          addFile({ name: newFolderName.trim(), language: 'folder', content: '' });
+                        }
+                        setNewFolderName('');
+                        setIsCreatingFolder(false);
+                      } else if (e.key === 'Escape') {
+                        setIsCreatingFolder(false);
+                        setNewFolderName('');
+                      }
+                    }}
+                    onBlur={() => {
+                      setIsCreatingFolder(false);
+                      setNewFolderName('');
+                    }}
+                  />
+                </div>
+              )}
+
               {rootFiles.map((file: any) => (
                 <FileItem key={file.name} file={file} />
               ))}
@@ -128,25 +151,25 @@ export function Sidebar() {
               {folders.map((folder: any) => {
                 const folderFiles = Object.values(files).filter((f: any) => f.language !== 'folder' && f.name.startsWith(folder.name + '/'));
                 return (
-                  <div key={folder.name} className="mt-2 w-[90%]">
-                    <div className="flex items-center justify-between px-1 py-1.5 text-xs font-semibold text-neutral-400 select-none group hover:bg-[#262626]/50 rounded mb-1">
+                  <div key={folder.name} className="mt-2 w-full">
+                    <div className="flex items-center justify-between px-2 py-1.5 text-xs font-semibold text-neutral-400 select-none group hover:bg-[#262626]/50 rounded-lg mb-1 transition-colors">
                       <div className="flex items-center gap-2">
                         <ChevronDown size={12} className="text-neutral-500" />
                         <Folder size={14} className="text-emerald-400" />
-                        <span>{folder.name}</span>
+                        <span className="truncate max-w-[100px]">{folder.name}</span>
                       </div>
                       <button 
                         onClick={() => {
                           setUploadFolder(folder.name);
                           fileInputRef.current?.click();
                         }}
-                        className="p-1 hover:bg-[#262626] rounded text-neutral-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+                        className="p-1 hover:bg-[#333] rounded text-neutral-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
                         title={`Add Image to ${folder.name}`}
                       >
                         <Plus size={12} />
                       </button>
                     </div>
-                    <div className="pl-4 flex flex-col space-y-0.5 border-l border-[#262626]/50 ml-1 mt-0.5 relative">
+                    <div className="pl-3 pr-1 flex flex-col space-y-0.5 border-l border-[#262626]/50 ml-2 mt-0.5 relative">
                       {folderFiles.map((file: any) => (
                         <FileItem key={file.name} file={file} />
                       ))}
