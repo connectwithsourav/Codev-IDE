@@ -15,6 +15,8 @@ interface IdeContextType {
   viewportMode: ViewportMode;
   setViewportMode: (mode: ViewportMode) => void;
   loadFiles: (newFiles: FilesRecord) => void;
+  isSidebarOpen: boolean;
+  toggleSidebar: () => void;
 }
 
 const DEFAULT_FILES: FilesRecord = {
@@ -30,6 +32,9 @@ export const IdeProvider = ({ children }: { children: React.ReactNode }) => {
   const [activeFile, setActiveFile] = useState<string>('index.html');
   const [history, setHistory] = useState<Commit[]>([]);
   const [viewportMode, setViewportMode] = useState<ViewportMode>('desktop');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   useEffect(() => {
     try {
@@ -121,7 +126,8 @@ export const IdeProvider = ({ children }: { children: React.ReactNode }) => {
     <IdeContext.Provider value={{
       files, updateFile, addFile, deleteItem, activeFile, setActiveFile,
       history, commitProject, restoreCommit,
-      viewportMode, setViewportMode, loadFiles
+      viewportMode, setViewportMode, loadFiles,
+      isSidebarOpen, toggleSidebar
     }}>
       {children}
     </IdeContext.Provider>

@@ -1,13 +1,14 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { 
   FileArchive, FileCode2, Upload, GitCommitHorizontal, CheckCircle2,
-  TerminalSquare, Braces, Code2
+  TerminalSquare, Braces, Code2, PanelLeft
 } from 'lucide-react';
 import { useIde } from '../hooks/useIdeContext';
+import { cn } from '../lib/utils';
 import { downloadSingleHtml, downloadZip, parseUploadedFile } from '../lib/export';
 
 export function TopBar() {
-  const { viewportMode, setViewportMode, files, commitProject, loadFiles } = useIde();
+  const { viewportMode, setViewportMode, files, commitProject, loadFiles, isSidebarOpen, toggleSidebar } = useIde();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [commitMessage, setCommitMessage] = useState('');
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving'>('saved');
@@ -54,6 +55,18 @@ export function TopBar() {
       </div>
 
       <div className="flex items-center gap-4 w-full lg:w-auto justify-center lg:justify-start relative z-10">
+        <button
+          onClick={toggleSidebar}
+          className={cn(
+            "hidden lg:flex p-2 rounded-lg transition-colors border shadow-sm",
+            isSidebarOpen 
+              ? "bg-[#262626] text-white border-[#333]" 
+              : "hover:bg-[#262626] text-neutral-400 hover:text-white border-transparent"
+          )}
+          title="Toggle Sidebar"
+        >
+          <PanelLeft size={20} />
+        </button>
         <div className="font-bold text-neutral-100 tracking-tight flex items-center gap-3 lg:mr-6 text-sm">
           <div className="relative w-10 h-10 flex-shrink-0 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center font-bold text-white shadow-lg border border-white/10 overflow-hidden">
             <div className="absolute inset-0 bg-blue-400 opacity-20 blur-md hidden lg:block"></div>

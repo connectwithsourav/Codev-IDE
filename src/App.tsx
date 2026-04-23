@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Panel, Group as PanelGroup, Separator as PanelResizeHandle } from 'react-resizable-panels';
-import { IdeProvider } from './hooks/useIdeContext';
+import { IdeProvider, useIde } from './hooks/useIdeContext';
 import { TopBar } from './components/TopBar';
 import { Sidebar } from './components/Sidebar';
 import { CodeEditor } from './components/CodeEditor';
@@ -8,6 +8,7 @@ import { Preview } from './components/Preview';
 import { FolderIcon, Code2Icon, PlayIcon } from 'lucide-react';
 
 function AppContent() {
+  const { isSidebarOpen } = useIde();
   const [mobileTab, setMobileTab] = useState<'files' | 'code' | 'preview'>('code');
   const [isMobile, setIsMobile] = useState(false);
 
@@ -28,16 +29,20 @@ function AppContent() {
         <main className="flex-1 min-h-0 flex overflow-hidden p-3 gap-3">
           <PanelGroup direction="horizontal">
             {/* Sidebar Panel */}
-            <Panel defaultSize={22} minSize={20} maxSize={40} className="flex h-full">
-              <Sidebar />
-            </Panel>
+            {isSidebarOpen && (
+              <>
+                <Panel id="sidebar" order={1} defaultSize={20} minSize={15} maxSize={35} className="flex h-full">
+                  <Sidebar />
+                </Panel>
 
-            <PanelResizeHandle className="w-3 bg-transparent cursor-col-resize flex flex-col items-center justify-center relative group">
-               <div className="absolute top-1/2 -mt-4 w-1 h-8 bg-[#262626] group-hover:bg-blue-500 rounded transition-colors" />
-            </PanelResizeHandle>
+                <PanelResizeHandle className="w-3 bg-transparent cursor-col-resize flex flex-col items-center justify-center relative group">
+                   <div className="absolute top-1/2 -mt-4 w-1 h-8 bg-[#262626] group-hover:bg-blue-500 rounded transition-colors" />
+                </PanelResizeHandle>
+              </>
+            )}
 
             {/* Editor Panel */}
-            <Panel defaultSize={42} minSize={25} className="flex h-full">
+            <Panel id="editor" order={2} defaultSize={isSidebarOpen ? 40 : 60} minSize={20} className="flex h-full">
               <CodeEditor />
             </Panel>
             
@@ -46,7 +51,7 @@ function AppContent() {
             </PanelResizeHandle>
             
             {/* Preview Panel */}
-            <Panel defaultSize={40} minSize={20} className="flex h-full">
+            <Panel id="preview" order={3} defaultSize={40} minSize={20} className="flex h-full">
               <Preview />
             </Panel>
           </PanelGroup>

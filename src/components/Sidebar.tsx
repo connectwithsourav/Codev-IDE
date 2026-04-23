@@ -12,6 +12,9 @@ export function Sidebar() {
   
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
+  
+  // Track which folder is pending deletion confirmation
+  const [confirmDeleteFolder, setConfirmDeleteFolder] = useState<string | null>(null);
 
   const handleAddAsset = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -42,7 +45,7 @@ export function Sidebar() {
         if (file.language !== 'image') setActiveFile(file.name);
       }}
       className={cn(
-        "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-sm w-full text-left transition-colors border border-transparent overflow-hidden",
+        "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-sm w-full text-left transition-colors border border-transparent flex-shrink-0 group relative overflow-hidden",
         activeFile === file.name ? "text-blue-500 bg-blue-500/10 font-semibold" : "hover:bg-[#262626] hover:text-neutral-200",
         file.language === 'image' && "cursor-default text-neutral-400"
       )}
@@ -54,12 +57,14 @@ export function Sidebar() {
         {file.language === 'javascript' && <FileJson size={15} className="text-yellow-400" />}
         {file.language === 'image' && <ImageIcon size={15} className="text-pink-400" />}
       </span>
-      <span className="truncate whitespace-nowrap leading-none pt-0.5">{file.name.split('/').pop()}</span>
+      <span className="flex-1 min-w-0 truncate whitespace-nowrap leading-none pt-0.5 text-left">
+        {file.name.split('/').pop()}
+      </span>
     </button>
   );
 
   return (
-    <aside className="h-full flex flex-col bg-[#111111] rounded-2xl border border-[#262626] text-neutral-300 font-medium z-10 w-full overflow-hidden">
+    <aside className="h-full flex flex-col bg-[#111111] rounded-2xl border border-[#262626] text-neutral-300 font-medium z-10 w-64 flex-shrink-0 overflow-hidden">
       <div className="flex bg-[#161616] border-b border-[#262626] px-4 py-2 gap-4">
         <button 
           onClick={() => setTab('files')} 
@@ -112,7 +117,7 @@ export function Sidebar() {
               </div>
             </div>
             
-            <div className="pl-3 pr-2 flex flex-col space-y-0.5 border-l border-[#262626] ml-3 mt-1 relative w-auto">
+            <div className="pl-3 flex flex-col space-y-0.5 border-l border-[#262626] ml-3 mt-1 relative overflow-hidden">
               
               {isCreatingFolder && (
                 <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm w-full transition-colors border border-blue-500/50 bg-[#262626]/40 mb-1">
@@ -121,7 +126,7 @@ export function Sidebar() {
                     autoFocus
                     type="text"
                     placeholder="Folder name..."
-                    className="bg-transparent border-none text-xs text-white focus:outline-none w-full"
+                    className="bg-transparent border-none text-xs text-white focus:outline-none w-full min-w-0"
                     value={newFolderName}
                     onChange={(e) => setNewFolderName(e.target.value)}
                     onKeyDown={(e) => {
@@ -151,39 +156,60 @@ export function Sidebar() {
               {folders.map((folder: any) => {
                 const folderFiles = Object.values(files).filter((f: any) => f.language !== 'folder' && f.name.startsWith(folder.name + '/'));
                 return (
-                  <div key={folder.name} className="mt-2 w-full">
-                    <div className="flex items-center justify-between px-2 py-1.5 text-xs font-semibold text-neutral-400 select-none group hover:bg-[#262626]/50 rounded-lg mb-1 transition-colors">
-                      <div className="flex items-center gap-2">
-                        <ChevronDown size={12} className="text-neutral-500" />
-                        <Folder size={14} className="text-emerald-400" />
-                        <span className="truncate max-w-[100px]">{folder.name}</span>
-                      </div>
-                      <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if(confirm(`Are you sure you want to delete folder '${folder.name}' and all its contents?`)) {
+                  <div key={folder.name} className="mt-2 w-full flex flex-col pr-2">
+                    {confirmDeleteFolder === folder.name ? (
+                      <div className="flex flex-col gap-2 px-2 py-2 text-xs font-semibold text-neutral-300 bg-red-500/10 border border-red-500/30 rounded-lg mb-1">
+                        <span className="text-red-400">Delete '{folder.name}' + all contents?</span>
+                        <div className="flex items-center gap-2">
+                          <button 
+                            onClick={() => {
                               deleteItem(folder.name);
-                            }
-                          }}
-                          className="p-1 hover:bg-[#333] rounded text-neutral-500 hover:text-red-400 transition-colors"
-                          title={`Delete ${folder.name}`}
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                        <button 
-                          onClick={() => {
-                            setUploadFolder(folder.name);
-                            fileInputRef.current?.click();
-                          }}
-                          className="p-1 hover:bg-[#333] rounded text-neutral-500 hover:text-white transition-colors"
-                          title={`Add Image to ${folder.name}`}
-                        >
-                          <Plus size={12} />
-                        </button>
+                              setConfirmDeleteFolder(null);
+                            }}
+                            className="bg-red-500/20 hover:bg-red-500/40 text-red-300 px-2 py-1 rounded transition-colors"
+                          >
+                            Yes, delete
+                          </button>
+                          <button 
+                            onClick={() => setConfirmDeleteFolder(null)}
+                            className="bg-[#262626] hover:bg-[#333] text-neutral-300 px-2 py-1 rounded transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                    <div className="pl-3 pr-1 flex flex-col space-y-0.5 border-l border-[#262626]/50 ml-2 mt-0.5 relative">
+                    ) : (
+                      <div className="flex items-center justify-between px-2 py-1.5 text-xs font-semibold text-neutral-400 select-none group hover:bg-[#262626]/50 rounded-lg mb-1 transition-colors relative">
+                        <div className="flex items-center gap-2 overflow-hidden">
+                          <ChevronDown size={12} className="text-neutral-500 shrink-0" />
+                          <Folder size={14} className="text-emerald-400 shrink-0" />
+                          <span className="truncate pr-2">{folder.name}</span>
+                        </div>
+                        <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity shrink-0 bg-[#161616]/80 group-hover:bg-transparent absolute right-2">
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setConfirmDeleteFolder(folder.name);
+                            }}
+                            className="p-1 hover:bg-[#333] rounded text-neutral-500 hover:text-red-400 transition-colors"
+                            title={`Delete ${folder.name}`}
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                          <button 
+                            onClick={() => {
+                              setUploadFolder(folder.name);
+                              fileInputRef.current?.click();
+                            }}
+                            className="p-1 hover:bg-[#333] rounded text-neutral-500 hover:text-white transition-colors"
+                            title={`Add Image to ${folder.name}`}
+                          >
+                            <Plus size={12} />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex flex-col space-y-0.5 ml-2 mt-0.5 relative pl-3 border-l border-[#262626]/50">
                       {folderFiles.map((file: any) => (
                         <FileItem key={file.name} file={file} />
                       ))}
