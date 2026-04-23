@@ -1,0 +1,6 @@
+{
+  "name": "Codev IDE",
+  "description": "Codev IDE is a versatile Web IDE for HTML, CSS, and JavaScript with live preview, responsive viewports, syntax highlighting, code formatting, and local version control.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
