@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { FilesRecord, Commit, ViewportMode } from '../types';
+import { FilesRecord, Commit, ViewportMode, FileDef } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
 interface IdeContextType {
   files: FilesRecord;
   updateFile: (name: string, content: string) => void;
+  addFile: (file: FileDef) => void;
   activeFile: string;
   setActiveFile: (name: string) => void;
   history: Commit[];
@@ -54,6 +55,15 @@ export const IdeProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.setItem('webide-files', JSON.stringify(newFiles));
   };
 
+  const addFile = (file: { name: string; language: any; content: string }) => {
+    const newFiles = {
+      ...files,
+      [file.name]: file
+    };
+    setFiles(newFiles);
+    localStorage.setItem('webide-files', JSON.stringify(newFiles));
+  };
+
   const commitProject = (message: string) => {
     const newCommit: Commit = {
       id: uuidv4(),
@@ -75,17 +85,14 @@ export const IdeProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const loadFiles = (newFiles: FilesRecord) => {
-    const mergedFiles = { ...DEFAULT_FILES };
-    if (newFiles['index.html']) mergedFiles['index.html'] = newFiles['index.html'];
-    if (newFiles['styles.css']) mergedFiles['styles.css'] = newFiles['styles.css'];
-    if (newFiles['script.js']) mergedFiles['script.js'] = newFiles['script.js'];
+    const mergedFiles = { ...DEFAULT_FILES, ...newFiles };
     setFiles(mergedFiles);
     localStorage.setItem('webide-files', JSON.stringify(mergedFiles));
   };
 
   return (
     <IdeContext.Provider value={{
-      files, updateFile, activeFile, setActiveFile,
+      files, updateFile, addFile, activeFile, setActiveFile,
       history, commitProject, restoreCommit,
       viewportMode, setViewportMode, loadFiles
     }}>

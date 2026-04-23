@@ -9,9 +9,20 @@ export function Preview() {
 
   const generatePreview = useRef(
     debounce((currentFiles: typeof files) => {
-      const htmlContent = currentFiles['index.html']?.content || '';
-      const cssContent = currentFiles['styles.css']?.content || '';
-      const jsContent = currentFiles['script.js']?.content || '';
+      let htmlContent = currentFiles['index.html']?.content || '';
+      let cssContent = currentFiles['styles.css']?.content || '';
+      let jsContent = currentFiles['script.js']?.content || '';
+
+      // Replace image paths with base64 data URIs
+      Object.values(currentFiles).forEach((file: any) => {
+        if (file.language === 'image') {
+          // Replace exactly the exact filename string
+          const regex = new RegExp(file.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+          htmlContent = htmlContent.replace(regex, file.content);
+          cssContent = cssContent.replace(regex, file.content);
+          jsContent = jsContent.replace(regex, file.content);
+        }
+      });
 
       const doc = `
         <!DOCTYPE html>
@@ -43,7 +54,6 @@ export function Preview() {
   const getContainerStyles = (): React.CSSProperties => {
     switch (viewportMode) {
       case 'mobile': return { width: '375px', minWidth: '375px', borderRadius: '2rem', padding: '0.5rem', background: '#000', border: '8px solid #222' };
-      case 'tablet': return { width: '768px', minWidth: '768px', borderRadius: '1.5rem', padding: '0.5rem', background: '#000', border: '8px solid #222' };
       case 'desktop': default: return { width: '100%', minWidth: '100%' };
     }
   };
@@ -54,9 +64,6 @@ export function Preview() {
         <div className="flex gap-1 bg-[#262626] p-0.5 rounded-lg">
           <button onClick={() => setViewportMode('desktop')} className={cn("p-1.5 rounded transition-colors", viewportMode === 'desktop' ? "bg-[#111111] text-white shadow" : "hover:bg-[#111111] text-neutral-500")} title="Desktop View">
             <Monitor size={14} />
-          </button>
-          <button onClick={() => setViewportMode('tablet')} className={cn("p-1.5 rounded transition-colors", viewportMode === 'tablet' ? "bg-[#111111] text-white shadow" : "hover:bg-[#111111] text-neutral-500")} title="Tablet View">
-            <Tablet size={14} />
           </button>
           <button onClick={() => setViewportMode('mobile')} className={cn("p-1.5 rounded transition-colors", viewportMode === 'mobile' ? "bg-[#111111] text-white shadow" : "hover:bg-[#111111] text-neutral-500")} title="Mobile View">
             <Smartphone size={14} />

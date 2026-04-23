@@ -1,9 +1,9 @@
-export type FileType = 'html' | 'css' | 'javascript';
+export type FileType = 'html' | 'css' | 'javascript' | 'image' | 'folder';
 
 export interface FileDef {
   name: string;
   language: FileType;
-  content: string;
+  content: string; // Will store base64 for images
 }
 
 export type FilesRecord = Record<string, FileDef>;
@@ -15,7 +15,7 @@ export interface Commit {
   files: FilesRecord;
 }
 
-export type ViewportMode = 'desktop' | 'tablet' | 'mobile';
+export type ViewportMode = 'desktop' | 'mobile';
 
 export interface ProjectState {
   files: FilesRecord;

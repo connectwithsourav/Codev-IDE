@@ -43,14 +43,14 @@ export function TopBar() {
   };
 
   return (
-    <header className="h-14 border-b border-[#262626] flex items-center justify-between px-4 bg-[#111111] shrink-0">
-      <div className="flex items-center gap-4">
-        <div className="font-bold text-neutral-100 tracking-tight flex items-center gap-2 mr-4 text-sm">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white">
+    <header className="border-b border-[#262626] flex flex-col lg:flex-row items-center lg:justify-between px-2 py-3 lg:py-0 lg:h-14 bg-[#111111] shrink-0 gap-3 lg:gap-0 overflow-x-hidden">
+      <div className="flex items-center gap-4 w-full lg:w-auto justify-center lg:justify-start">
+        <div className="font-bold text-neutral-100 tracking-tight flex items-center gap-2 lg:mr-4 text-sm">
+          <div className="w-8 h-8 flex-shrink-0 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white">
             <FileCode2 size={16} />
           </div>
-          <div className="flex flex-col">
-            <span className="font-semibold text-neutral-100 text-sm leading-tight tracking-tight">Web IDE Pro</span>
+          <div className="flex flex-col text-left">
+            <span className="font-semibold text-neutral-100 text-sm leading-tight tracking-tight">Codev IDE</span>
             <span className="text-[10px] text-neutral-500 font-medium flex items-center gap-1">
               {saveStatus === 'saving' ? (
                 <>Saving...</>
@@ -62,7 +62,7 @@ export function TopBar() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center justify-center gap-2 w-full lg:w-auto pb-1 lg:pb-0">
         {/* Commit Input Area */}
         {showCommitInput ? (
           <div className="flex items-center gap-2 mr-2">
