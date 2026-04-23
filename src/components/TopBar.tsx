@@ -98,7 +98,7 @@ export function TopBar() {
             className="flex items-center gap-1.5 text-xs font-medium hover:text-white hover:bg-[#262626] px-3 py-2 rounded-lg transition-colors"
             title="Commit changes"
           >
-            <GitCommitHorizontal size={16} className="text-emerald-400" /> <span className="hidden sm:inline">Commit</span>
+            <GitCommitHorizontal size={16} className="text-emerald-400" /> <span>Commit</span>
           </button>
         )}
 

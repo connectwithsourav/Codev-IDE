@@ -1,11 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { useIde } from '../hooks/useIdeContext';
-import { FileCode2, RefreshCcw, FileCode, FileJson, Clock, History, Folder, ChevronDown, Plus, Image as ImageIcon, FolderPlus } from 'lucide-react';
+import { FileCode2, RefreshCcw, FileCode, FileJson, Clock, History, Folder, ChevronDown, Plus, Image as ImageIcon, FolderPlus, Trash2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 
 export function Sidebar() {
-  const { files, addFile, activeFile, setActiveFile, history, restoreCommit } = useIde();
+  const { files, addFile, deleteItem, activeFile, setActiveFile, history, restoreCommit } = useIde();
   const [tab, setTab] = useState<'files' | 'history'>('files');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadFolder, setUploadFolder] = useState<string>('');
@@ -158,16 +158,30 @@ export function Sidebar() {
                         <Folder size={14} className="text-emerald-400" />
                         <span className="truncate max-w-[100px]">{folder.name}</span>
                       </div>
-                      <button 
-                        onClick={() => {
-                          setUploadFolder(folder.name);
-                          fileInputRef.current?.click();
-                        }}
-                        className="p-1 hover:bg-[#333] rounded text-neutral-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
-                        title={`Add Image to ${folder.name}`}
-                      >
-                        <Plus size={12} />
-                      </button>
+                      <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if(confirm(`Are you sure you want to delete folder '${folder.name}' and all its contents?`)) {
+                              deleteItem(folder.name);
+                            }
+                          }}
+                          className="p-1 hover:bg-[#333] rounded text-neutral-500 hover:text-red-400 transition-colors"
+                          title={`Delete ${folder.name}`}
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setUploadFolder(folder.name);
+                            fileInputRef.current?.click();
+                          }}
+                          className="p-1 hover:bg-[#333] rounded text-neutral-500 hover:text-white transition-colors"
+                          title={`Add Image to ${folder.name}`}
+                        >
+                          <Plus size={12} />
+                        </button>
+                      </div>
                     </div>
                     <div className="pl-3 pr-1 flex flex-col space-y-0.5 border-l border-[#262626]/50 ml-2 mt-0.5 relative">
                       {folderFiles.map((file: any) => (

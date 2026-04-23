@@ -6,6 +6,7 @@ interface IdeContextType {
   files: FilesRecord;
   updateFile: (name: string, content: string) => void;
   addFile: (file: FileDef) => void;
+  deleteItem: (name: string) => void;
   activeFile: string;
   setActiveFile: (name: string) => void;
   history: Commit[];
@@ -64,6 +65,32 @@ export const IdeProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.setItem('webide-files', JSON.stringify(newFiles));
   };
 
+  const deleteItem = (name: string) => {
+    const newFiles = { ...files };
+    const isFolder = newFiles[name]?.language === 'folder';
+    
+    // Delete the target item
+    delete newFiles[name];
+    
+    // If it's a folder, explicitly delete all nested children
+    if (isFolder) {
+      Object.keys(newFiles).forEach(key => {
+        if (key.startsWith(`${name}/`)) {
+          delete newFiles[key];
+        }
+      });
+    }
+
+    setFiles(newFiles);
+    localStorage.setItem('webide-files', JSON.stringify(newFiles));
+
+    // Fallback if the active file was within the deleted folder/file
+    if (activeFile === name || activeFile.startsWith(`${name}/`)) {
+      if (newFiles['index.html']) setActiveFile('index.html');
+      else setActiveFile(Object.keys(newFiles)[0] || '');
+    }
+  };
+
   const commitProject = (message: string) => {
     const newCommit: Commit = {
       id: uuidv4(),
@@ -92,7 +119,7 @@ export const IdeProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <IdeContext.Provider value={{
-      files, updateFile, addFile, activeFile, setActiveFile,
+      files, updateFile, addFile, deleteItem, activeFile, setActiveFile,
       history, commitProject, restoreCommit,
       viewportMode, setViewportMode, loadFiles
     }}>

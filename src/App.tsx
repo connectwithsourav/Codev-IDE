@@ -28,7 +28,7 @@ function AppContent() {
         <main className="flex-1 min-h-0 flex overflow-hidden p-3 gap-3">
           <PanelGroup direction="horizontal">
             {/* Sidebar Panel */}
-            <Panel defaultSize={18} minSize={15} maxSize={30} className="flex h-full">
+            <Panel defaultSize={22} minSize={20} maxSize={40} className="flex h-full">
               <Sidebar />
             </Panel>
 
